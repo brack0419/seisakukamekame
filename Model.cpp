@@ -1,12 +1,22 @@
 #include "Graphics/Graphics.h"
 #include "Graphics/Model.h"
 
+#include <unordered_map>
+#include <string>
+
+static std::unordered_map<std::string, std::shared_ptr<ModelResource>> resourceCache;
 // コンストラクタ
 Model::Model(const char* filename)
 {
-	// リソース読み込み
-	resource = std::make_shared<ModelResource>();
-	resource->Load(Graphics::Instance().GetDevice(), filename);
+	
+	if (resourceCache.find(filename) == resourceCache.end())
+	{
+		auto newResource = std::make_shared<ModelResource>();
+		newResource->Load(Graphics::Instance().GetDevice(), filename);
+		resourceCache[filename] = newResource; // キャッシュに登録
+	}
+
+	resource = resourceCache[filename];
 
 	// ノード
 	const std::vector<ModelResource::Node>& resNodes = resource->GetNodes();
